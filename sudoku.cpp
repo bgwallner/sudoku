@@ -22,39 +22,37 @@ static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
     {
         while (cValue != EOF)
         {
-            /* Check if boundarys OK */
-            if (1 == ucStatus)
+            cValue = getc(fhPuzzle);
+
+            /* Check values newline & EOF */
+            if (('\n' == cValue) || (EOF == cValue))
             {
-                cValue = getc(fhPuzzle);
-
-                /* Check values newline & EOF */
-                if (('\n' == cValue) || (EOF == cValue))
+                /* Only allowed at N */
+                if (N != uiCol && uiRow < N)
                 {
-                    if (N != uiCol && uiRow < N)
-                    {
-                        ucStatus = 0;
-                        break;
-                    }
+                    ucStatus = 0;
+                    break;
                 }
+            }
 
-                uiValue = cValue - '0';
+            /* Convert char to uint */
+            uiValue = cValue - '0';
 
-                /* Assign uiValue if valid [1,9] */
-                if (uiValue >= 1 && uiValue <= 9)
-                {
-                    puzzle[uiRow][uiCol] = (unsigned int)uiValue;
-                }
+            /* Assign uiValue if valid [1,9] */
+            if (uiValue >= 1 && uiValue <= 9)
+            {
+                puzzle[uiRow][uiCol] = (unsigned int)uiValue;
+            }
 
-                /* Check if end of row */
-                if ('\n' == cValue)
-                {
-                    uiCol = 0;
-                    uiRow++;
-                }
-                else
-                {
-                    uiCol++;
-                }
+            /* Check if end of row */
+            if ('\n' == cValue)
+            {
+                uiCol = 0;
+                uiRow++;
+            }
+            else
+            {
+                uiCol++;
             }
         }
     }
@@ -114,7 +112,11 @@ int main()
     printf("               PART 2 - Solving the puzzle.\n");
 
     printf("\n");
-    printf("Program END.");
+    printf("Program END.\n");
+    printf("\n");
+    printf("Press ENTER key to Continue\n");
+    printf("\n");
+    getchar();
 
     return 1;
 }
