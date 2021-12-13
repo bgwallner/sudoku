@@ -22,17 +22,21 @@ static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
     {
         while (cValue != EOF)
         {
-            /* Check boundarys */
-            if ((uiRow > N) || (uiCol > N))
-            {
-                ucStatus = 0;
-                break;
-            }
-
             /* Check if boundarys OK */
             if (1 == ucStatus)
             {
                 cValue = getc(fhPuzzle);
+
+                /* Check values newline & EOF */
+                if (('\n' == cValue) || (EOF == cValue))
+                {
+                    if (N != uiCol && uiRow < N)
+                    {
+                        ucStatus = 0;
+                        break;
+                    }
+                }
+
                 uiValue = cValue - '0';
 
                 /* Assign uiValue if valid [1,9] */
@@ -108,6 +112,9 @@ int main()
 
     printf("\n");
     printf("               PART 2 - Solving the puzzle.\n");
+
+    printf("\n");
+    printf("Program END.");
 
     return 1;
 }
