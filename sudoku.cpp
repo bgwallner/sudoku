@@ -22,6 +22,23 @@ typedef struct
 
 static recursion_ctr_t recursion_ctr;
 
+/******************* LOCAL FUNCTION DECLARATIONS *****************/
+
+static unsigned char read_puzzle_from_txt(unsigned int puzzle[N][N]);
+static void print_puzzle(unsigned int puzzle[N][N]);
+static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N][N],
+                                     unsigned int uiRow, unsigned int uiCol);
+static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N][N],
+                                     unsigned int uiRow, unsigned int uiCol);
+static unsigned char is_in_group_valid(unsigned int uiValue, unsigned int puzzle[N][N],
+                                       unsigned int uiRow, unsigned int uiCol);
+static void increase_recursion_counter(void);
+static unsigned char get_first_free_element(unsigned int puzzle[N][N],
+                                            unsigned int* puiRow, unsigned int* puiCol);
+static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N]);
+static unsigned char solve_puzzle(unsigned int puzzle[N][N]);
+
+/*****************************************************************/
 
 /* Reading the puzzle from FILE_NAME */
 static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
@@ -104,24 +121,24 @@ static void print_puzzle(unsigned int puzzle[N][N])
 
 /* Check if provided uiValue is already present in uiRow. */
 static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N][N],
-                                     unsigned char ucRow, unsigned char ucCol)
+                                     unsigned int uiRow, unsigned int uiCol)
 {
-    unsigned char ucIndex;
+    unsigned int uiIndex;
     unsigned char ucStatus;
 
     /* Boundary check */
-    if ((ucRow > (N - 1)) || (ucCol > (N - 1)))
+    if ((uiRow > (N - 1)) || (uiCol > (N - 1)))
     {
         return INDEX_ERROR;
     }
     
     ucStatus = E_OK;
-    for (ucIndex = 0; ucIndex < N; ucIndex++)
+    for (uiIndex = 0; uiIndex < N; uiIndex++)
     {
         /* Coloumn is running index */
-        if (ucIndex != ucCol)
+        if (uiIndex != uiCol)
         {
-            if (uiValue == puzzle[ucRow][ucIndex])
+            if (uiValue == puzzle[uiRow][uiIndex])
             {
                 ucStatus = E_NOT_OK;
                 break;
@@ -133,24 +150,24 @@ static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N
 
 /* Check if provided uiValue is already present in uiCol. */
 static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N][N],
-                                     unsigned char ucRow, unsigned char ucCol)
+                                     unsigned int uiRow, unsigned int uiCol)
 {
-    unsigned char ucIndex;
+    unsigned int uiIndex;
     unsigned char ucStatus;
 
     /* Boundary check */
-    if ((ucRow > (N - 1)) || (ucCol > (N - 1)))
+    if ((uiRow > (N - 1)) || (uiCol > (N - 1)))
     {
         return INDEX_ERROR;
     }
 
     ucStatus = E_OK;
-    for (ucIndex = 0; ucIndex < N; ucIndex++)
+    for (uiIndex = 0; uiIndex < N; uiIndex++)
     {
         /* Row is running index */
-        if (ucIndex != ucRow)
+        if (uiIndex != uiRow)
         {
-            if (uiValue == puzzle[ucIndex][ucCol])
+            if (uiValue == puzzle[uiIndex][uiCol])
             {
                 ucStatus = E_NOT_OK;
                 break;
@@ -163,7 +180,7 @@ static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N
 /* Check if provided uiValue is already present in group belonging to */
 /* in which uiRow and uiCol is present.                               */
 static unsigned char is_in_group_valid(unsigned int uiValue, unsigned int puzzle[N][N],
-                                       unsigned char ucRow, unsigned char ucCol)
+                                       unsigned int uiRow, unsigned int uiCol)
 {
     return E_NOT_OK;
 }
@@ -191,8 +208,39 @@ static void increase_recursion_counter(void)
     }
 }
 
-/* Function validate a 3x3 puzzle */
-static unsigned char validate_3_by_3_puzzle(unsigned int puzzle[N][N])
+/* Get the first available element (value=0) */
+static unsigned char get_first_free_element(unsigned int puzzle[N][N],
+                                            unsigned int* puiRow, unsigned int* puiCol)
+{
+    unsigned int uiRow, uiCol;
+    unsigned char ucStatus;
+
+    /* This function could utilize a stack with pairs (uiRow, uiCol) having */
+    /* element with value=0. However, to tedious to implement in C with     */
+    /* no built-in support. Instead, do search from (0,0) in linear         */
+    /* time.                                                                */
+
+    ucStatus = E_NOT_OK;
+    for (uiRow = 0; uiRow < N; uiRow++)
+    {
+        for (uiCol = 0; uiCol < N; uiCol++)
+        {
+            if (0 == puzzle[uiRow][uiCol])
+            {
+                /* Found available element */
+                *puiRow = uiRow;
+                *puiCol = uiCol;
+                ucStatus = E_OK;
+                goto end; /* Forgive me, but better than return E_OK */
+            }
+        }
+    }
+    end:
+    return ucStatus;
+}
+
+/* Function validate a 9x9 puzzle */
+static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
 {
     /* 1) Check that all rows have sum=45 */
     /* 2) Check that all cols have sum=45 */
@@ -200,6 +248,24 @@ static unsigned char validate_3_by_3_puzzle(unsigned int puzzle[N][N])
     /*    a[row][col]+a[col-1][row]+a[col+1][row]+... = 45               */
 
     return E_NOT_OK;
+}
+
+/* Recursive solver */
+static unsigned char solve_puzzle(unsigned int puzzle[N][N])
+{
+    unsigned int uiRow, uiCol;
+    unsigned char ucStatus;
+    
+    /* Find first element with value 0 */
+    if (E_OK == get_first_free_element(puzzle, &uiRow, &uiCol))
+    {
+        puzzle[uiRow][uiCol] = 1;
+        if(E_OK != solve_puzzle(puzzle))
+        { 
+            return E_NOT_OK;
+        }
+    }
+    return E_OK;
 }
 
 int main()
@@ -238,6 +304,9 @@ int main()
 
     printf("\n");
     printf("               PART 2 - Solving the puzzle.\n");
+
+    /* Invoke recursive puzzle solver */
+    solve_puzzle(puzzle);
 
     printf("\n");
     printf("Program END.\n");
