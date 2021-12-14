@@ -104,24 +104,24 @@ static void print_puzzle(unsigned int puzzle[N][N])
 
 /* Check if provided uiValue is already present in uiRow. */
 static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N][N],
-                                     unsigned char uiRow, unsigned char uiCol)
+                                     unsigned char ucRow, unsigned char ucCol)
 {
-    unsigned short uiIndex;
+    unsigned char ucIndex;
     unsigned char ucStatus;
 
     /* Boundary check */
-    if ((uiRow > (N - 1)) || (uiCol > (N - 1)))
+    if ((ucRow > (N - 1)) || (ucCol > (N - 1)))
     {
         return INDEX_ERROR;
     }
     
     ucStatus = E_OK;
-    for (uiIndex = 0; uiIndex < N; uiIndex++)
+    for (ucIndex = 0; ucIndex < N; ucIndex++)
     {
         /* Coloumn is running index */
-        if (uiIndex != uiCol)
+        if (ucIndex != ucCol)
         {
-            if (uiValue == puzzle[uiRow][uiIndex])
+            if (uiValue == puzzle[ucRow][ucIndex])
             {
                 ucStatus = E_NOT_OK;
                 break;
@@ -133,24 +133,24 @@ static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N
 
 /* Check if provided uiValue is already present in uiCol. */
 static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N][N],
-                                     unsigned char uiRow, unsigned char uiCol)
+                                     unsigned char ucRow, unsigned char ucCol)
 {
-    unsigned short uiIndex;
+    unsigned char ucIndex;
     unsigned char ucStatus;
 
     /* Boundary check */
-    if ((uiRow > (N - 1)) || (uiCol > (N - 1)))
+    if ((ucRow > (N - 1)) || (ucCol > (N - 1)))
     {
         return INDEX_ERROR;
     }
 
     ucStatus = E_OK;
-    for (uiIndex = 0; uiIndex < N; uiIndex++)
+    for (ucIndex = 0; ucIndex < N; ucIndex++)
     {
         /* Row is running index */
-        if (uiIndex != uiRow)
+        if (ucIndex != ucRow)
         {
-            if (uiValue == puzzle[uiIndex][uiCol])
+            if (uiValue == puzzle[ucIndex][ucCol])
             {
                 ucStatus = E_NOT_OK;
                 break;
@@ -163,7 +163,7 @@ static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N
 /* Check if provided uiValue is already present in group belonging to */
 /* in which uiRow and uiCol is present.                               */
 static unsigned char is_in_group_valid(unsigned int uiValue, unsigned int puzzle[N][N],
-                                       unsigned char uiRow, unsigned char uiCol)
+                                       unsigned char ucRow, unsigned char ucCol)
 {
     return E_NOT_OK;
 }
