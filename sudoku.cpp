@@ -1,8 +1,10 @@
 // sudoku.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <time.h>
 
 /******************* DEFINES ******************/
 
@@ -15,7 +17,7 @@
 #define E_INDEX_ERROR    0xFF
 
 /* User defined */
-#define GNU_LINUX           0
+#define GNU_LINUX           1
 #define N                   9 /* size of puzzle */
 #define MAX_NBR_RECURSIONS  ULLONG_MAX
 
@@ -479,8 +481,11 @@ int main()
 {
     unsigned int puzzle[N][N] = { 0 }; /* puzzle[row][col] = puzzle[y][x] */
     unsigned int puzzlecopy[N][N] = { 0 };
+    unsigned int newpuzzle[N][N] = {0};
+    unsigned int newpuzzlecopy[N][N] = {0};
     unsigned char ucStatus = E_NOT_OK;
-    unsigned int uiRow, uiCol;
+    unsigned int uiRow, uiCol, uiCounter, uiValue, uiIterations;
+    time_t t;
 
     /* Init recursion counter */
     recursion_ctr.remainder = 0;
@@ -617,8 +622,50 @@ int main()
     /************** PART 3 ***************/
 
     /* Try some random placement of numbers, then try to */
-    /* solve the puzzle.                                 */
+    /* solve the puzzle. If fail, try again...           */
 
+    printf("\n");
+    printf("               PART 3 - Creating a puzzle.\n");
+
+    uiIterations = 0;
+    ucStatus = E_NOT_OK;
+
+    srand((unsigned) time(&t));
+    while( uiIterations < 20 )
+    {
+        uiRow = rand() % 10;
+        uiCol = rand() % 10;
+        uiValue= rand() % 10;
+
+        recursion_ctr.remainder = 0;
+        /* Only place if value is zero */
+        if( 0 == newpuzzle[uiRow][uiCol])
+        {
+            newpuzzle[uiRow][uiCol] = uiValue;
+            newpuzzlecopy[uiRow][uiCol] = uiValue;
+
+            /* Try to solve the puzzle */
+            ucStatus = solve_puzzle_increment(newpuzzle);
+            if (E_OK == ucStatus)
+            {
+                printf("\n");
+                printf("RESULT: Initial puzzle & solved puzzle.\n");
+                printf("\n");
+                print_puzzle(newpuzzlecopy);
+                printf("\n");
+                print_puzzle(newpuzzle);
+                printf("\n");
+                printf("Number of recursions needed: %d\n", recursion_ctr.remainder);
+                uiIterations++;
+            }
+            else
+            {
+                /* Not possible to solve */
+                newpuzzle[uiRow][uiCol] = 0;
+                newpuzzlecopy[uiRow][uiCol] = 0;
+            }
+        }
+    }
 
     printf("\n");
     printf("Program END.\n");
