@@ -19,7 +19,7 @@
 /* User defined */
 #define N                   9 /* size of puzzle */
 #define MAX_NBR_RECURSIONS  ULLONG_MAX
-#define FILE_NAME          "puzzle1.txt"
+#define FILE_NAME          "vaderlinds.txt" //"puzzle1.txt"
 
 /**** File-global variables & definitions *****/
 
@@ -415,23 +415,25 @@ int main()
 
     /* Invoke recursive puzzle solver */
     ucStatus = solve_puzzle(puzzle);
-    print_puzzle(puzzle);
     if (E_NOT_OK == ucStatus)
     {
         printf("\n");
-        printf("Puzzle could not be solved.\n");
+        printf("RESULT: Puzzle could not be solved.\n");
         return 0;
     }
     else if (E_MAX_RECURSIONS == ucStatus)
     {
         printf("\n");
-        printf("Maximum numbers of recusions reached when solving puzzle.\n");
+        printf("RESULT: Maximum numbers of recusions reached when solving puzzle.\n");
         return 0;
     }
     else
     {
         printf("\n");
-        printf("Puzzle solved OK.\n");
+        printf("RESULT: Puzzle solved SUCCESSFUL.\n");
+        printf("\n");
+        printf("\n");
+        print_puzzle(puzzle);
     }
     
     /* Print the (hopefully) solved puzzle */
@@ -445,12 +447,12 @@ int main()
     if (E_OK == validate_9_by_9_puzzle(puzzle))
     {
         printf("\n");
-        printf("Puzzle validated SUCCESSFUL.\n");
+        printf("RESULT: Puzzle validated SUCCESSFUL.\n");
     }
     else
     {
         printf("\n");
-        printf("Puzzle validated FAILED.\n");
+        printf("RESULT: Puzzle validated FAILED.\n");
     }
 
     /************** PART 3 ***************/
