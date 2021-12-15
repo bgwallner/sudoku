@@ -1,17 +1,25 @@
 // sudoku.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+/* 1) Intentional single point exit by 'goto'. */
+
 #include <stdio.h>
 #include <limits.h>
 
 /******************* DEFINES ******************/
 
-#define N 9 /* size of puzzle */
 #define SUDOKU_SUM 45 /* sum of row, col or group */
-#define FILE_NAME "puzzle1.txt"
-#define INDEX_ERROR 0xFF
-#define E_OK        0x01
-#define E_NOT_OK    0x00
+
+/* Status codes */
+#define E_OK             0x01
+#define E_NOT_OK         0x00
+#define E_MAX_RECURSIONS 0x02
+#define E_INDEX_ERROR    0xFF
+
+/* User defined */
+#define N                   9 /* size of puzzle */
+#define MAX_NBR_RECURSIONS  ULLONG_MAX
+#define FILE_NAME          "puzzle1.txt"
 
 /**** File-global variables & definitions *****/
 
@@ -66,7 +74,7 @@ static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
                 if (N != uiCol && uiRow < N)
                 {
                     ucStatus = E_NOT_OK;
-                    break;
+                    goto end;
                 }
             }
 
@@ -91,6 +99,8 @@ static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
             }
         }
     }
+
+    end:
     return ucStatus;
 }
 
@@ -130,7 +140,8 @@ static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N
     /* Boundary check */
     if ((uiRow >= N) || (uiCol >= N))
     {
-        return INDEX_ERROR;
+        ucStatus = E_INDEX_ERROR;
+        goto end;
     }
     
     ucStatus = E_OK;
@@ -142,10 +153,12 @@ static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N
             if (uiValue == puzzle[uiRow][uiIndex])
             {
                 ucStatus = E_NOT_OK;
-                break;
+                goto end;
             }
         }
     }
+
+    end:
     return ucStatus;
 }
 
@@ -159,7 +172,8 @@ static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N
     /* Boundary check */
     if ((uiRow >= N) || (uiCol >= N))
     {
-        return INDEX_ERROR;
+        ucStatus = E_INDEX_ERROR;
+        goto end;
     }
 
     ucStatus = E_OK;
@@ -171,10 +185,12 @@ static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N
             if (uiValue == puzzle[uiIndex][uiCol])
             {
                 ucStatus = E_NOT_OK;
-                break;
+                goto end;
             }
         }
     }
+
+    end:
     return ucStatus;
 }
 
@@ -183,8 +199,36 @@ static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N
 static unsigned char is_in_group_valid(unsigned int uiValue, unsigned int puzzle[N][N],
                                        unsigned int uiRow, unsigned int uiCol)
 {
-    /* TODO */
-    return E_OK;
+    unsigned int uiRowStart, uiColStart, uiRowIndex, uiColIndex;
+    unsigned char ucStatus;
+
+    /* Boundary check */
+    if ((uiRow >= N) || (uiCol >= N))
+    {
+        ucStatus = E_INDEX_ERROR;
+        goto end;
+    }
+
+    /* Find row and col start, e.g. group2 starts at col=3 and ends col=5 */
+    /* and 3 mod 3 = 0, 4 mod 3 = 1, 5 mod 3 = 2. Use this to find start. */
+    uiRowStart = uiRow - uiRow % 3;
+    uiColStart = uiCol - uiCol % 3;
+
+    ucStatus = E_OK;
+    for (uiRowIndex = uiRowStart; uiRowIndex < (uiRowStart + 3); uiRowIndex++)
+    {
+        for (uiColIndex = uiColStart; uiColIndex < (uiColStart + 3); uiColIndex++)
+        {
+            if (uiValue == puzzle[uiRowIndex][uiColIndex])
+            {
+                ucStatus = E_NOT_OK;
+                goto end;
+            }
+        }
+    }
+
+    end:
+    return ucStatus;
 }
 
 /* Increases counter in every recursion to determine complexity */
@@ -309,6 +353,12 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N])
 
     /* Inrease counter for every recursion */
     increase_recursion_counter();
+
+    /* Check that max number of recursions not exceeded */
+    if (recursion_ctr.remainder > MAX_NBR_RECURSIONS)
+    {
+        return E_MAX_RECURSIONS;
+    }
     
     /* Find first element with value 0 */
     if (E_OK == get_first_free_element(puzzle, &uiRow, &uiCol)) /* <--- here iteration in uiRow,uiCol takes place */
@@ -346,6 +396,7 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N])
 int main()
 {
     unsigned int puzzle[N][N] = { 0 }; /* puzzle[row][col] = puzzle[y][x] */
+    unsigned char ucStatus = E_NOT_OK;
 
     /* Init recursion counter */
     recursion_ctr.remainder = 0;
@@ -354,6 +405,8 @@ int main()
     printf("\n");
     printf("Program START...\n");
     printf("\n");
+
+    /************** PART 1 ***************/
 
     printf("             PART 1 - Reading from file.\n");
     printf("\n");
@@ -377,11 +430,30 @@ int main()
     printf("\n");
     printf("               PART 1 - COMPLETED.\n");
 
+    /************** PART 2 ***************/
+
     printf("\n");
     printf("               PART 2 - Solving the puzzle.\n");
 
     /* Invoke recursive puzzle solver */
-    (void)solve_puzzle(puzzle);
+    ucStatus = solve_puzzle(puzzle);
+    if (E_NOT_OK == ucStatus)
+    {
+        printf("\n");
+        printf("Puzzle could not be solved.\n");
+        return 0;
+    }
+    else if (E_MAX_RECURSIONS == ucStatus)
+    {
+        printf("\n");
+        printf("Maximum numbers of recusions reached when solving puzzle.\n");
+        return 0;
+    }
+    else
+    {
+        printf("\n");
+        printf("Puzzle solved OK.\n");
+    }
     
     /* Print the (hopefully) solved puzzle */
     printf("\n");
@@ -401,6 +473,12 @@ int main()
         printf("\n");
         printf("Puzzle validated FAILED.\n");
     }
+
+    /************** PART 3 ***************/
+
+    /* Try some random placement of numbers, then try to */
+    /* solve the puzzle.                                 */
+
 
     printf("\n");
     printf("Program END.\n");
