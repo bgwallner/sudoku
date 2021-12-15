@@ -402,6 +402,7 @@ static unsigned char solve_puzzle_increment(unsigned int puzzle[N][N])
     return E_NOT_OK;
 }
 
+/* Solved puzzle by decrementing uiValue */
 static unsigned char solve_puzzle_decrement(unsigned int puzzle[N][N])
 {
     unsigned int uiRow, uiCol, uiValue;
@@ -418,8 +419,8 @@ static unsigned char solve_puzzle_decrement(unsigned int puzzle[N][N])
     /* Find first element with value 0 */
     if (E_OK == get_first_free_element(puzzle, &uiRow, &uiCol)) /* <--- here iteration in uiRow,uiCol takes place */
     {
-        /* Test all values from 1..N */
-        for (uiValue = N; uiValue <= 1; uiValue--)
+        /* Test all values from N..1 */
+        for (uiValue = N; uiValue >= 1; uiValue--)
         {
             /* Check if uiValue is valid for (uiRow, uiCol) */
             if ((E_OK == is_in_col_valid(uiValue, puzzle, uiRow, uiCol)) &&
@@ -428,7 +429,7 @@ static unsigned char solve_puzzle_decrement(unsigned int puzzle[N][N])
             {
                 /* Assign possible candidate */
                 puzzle[uiRow][uiCol] = uiValue;
-                if (E_OK == solve_puzzle_increment(puzzle))
+                if (E_OK == solve_puzzle_decrement(puzzle))
                 {
                     /* Puzzle solved, we are done. This status comes  */
                     /* from get_first_free_element() in one-step-down */
@@ -454,7 +455,7 @@ static unsigned char solve_puzzle_decrement(unsigned int puzzle[N][N])
         return E_OK;
     }
     /* Puzzle not yet solved, "rolling back" since */
-    /* we set puzzle[uiRow][uiCol] = 0             */
+    /* we set puzzle[uiRow][uiCol] = 0         */
     return E_NOT_OK;
 }
 
@@ -595,21 +596,26 @@ int main()
     printf("UNIQUENESS: Start to verify if solution is unique.\n");
     ucStatus = solve_puzzle_decrement(puzzlecopy);
     printf("\n");
+    printf("(Puzzle solved by decrementing values. Proof of uniqueness?)\n");
+    printf("\n");
     print_puzzle(puzzlecopy);
 
     if (E_OK == ucStatus)
     {
         if (E_OK == is_solution_unique(puzzle, puzzlecopy))
         {
+            printf("\n");
             printf(" - Verified unique solution.\n");
         }
         else
         {
+            printf("\n");
             printf(" - Other solutions exist.\n");
         }
     }
     else
     {
+        printf("\n");
         printf(" - It was not possible to solve in decrementing order.\n");
     }
 
