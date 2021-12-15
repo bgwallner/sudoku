@@ -17,7 +17,7 @@
 #define E_INDEX_ERROR    0xFF
 
 /* User defined */
-#define GNU_LINUX           1
+#define GNU_LINUX           0
 #define N                   9 /* size of puzzle */
 #define MAX_NBR_RECURSIONS  ULLONG_MAX
 
@@ -639,7 +639,7 @@ int main()
 
         recursion_ctr.remainder = 0;
         /* Only place if value is zero */
-        if( 0 == newpuzzle[uiRow][uiCol])
+        if( 0 == newpuzzle[uiRow][uiCol] )
         {
             newpuzzle[uiRow][uiCol] = uiValue;
             newpuzzlecopy[uiRow][uiCol] = uiValue;
@@ -651,12 +651,23 @@ int main()
                 printf("\n");
                 printf("RESULT: Initial puzzle & solved puzzle.\n");
                 printf("\n");
+                printf("Number of elements puzzle: %d\n", uiIterations+1);
+                printf("\n");
                 print_puzzle(newpuzzlecopy);
                 printf("\n");
                 print_puzzle(newpuzzle);
                 printf("\n");
                 printf("Number of recursions needed: %d\n", recursion_ctr.remainder);
                 uiIterations++;
+
+                /* Copy puzzlecopy to puzzle */
+                for (uiRow = 0; uiRow < N; uiRow++)
+                {
+                    for (uiCol = 0; uiCol < N; uiCol++)
+                    {
+                        newpuzzle[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
+                    }
+                }
             }
             else
             {
