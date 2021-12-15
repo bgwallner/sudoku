@@ -654,8 +654,6 @@ int main()
                 if (E_OK == ucStatus)
                 {
                     printf("\n");
-                    printf("RESULT: Initial puzzle & solved puzzle.\n");
-                    printf("\n");
                     printf("Number of elements puzzle: %d\n", uiIterations + 1);
                     printf("\n");
                     print_puzzle(newpuzzlecopy);
