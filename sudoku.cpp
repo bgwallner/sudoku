@@ -20,8 +20,15 @@
 #define GNU_LINUX           0
 #define N                   9 /* size of puzzle */
 #define MAX_NBR_RECURSIONS  ULLONG_MAX
-#define FILE_NAME          "vaderlinds1.txt"     /* Level 1*/
-//#define FILE_NAME          "vaderlinds190.txt"  /* Level 7 */
+
+/* Input from Vaderlinds Stora Sudoku boken. */
+//#define FILE_NAME          "vaderlinds1.txt"       /* Level 1*/
+//#define FILE_NAME          "vaderlinds30.txt"      /* Level 2*/
+//#define FILE_NAME          "vaderlinds70.txt"      /* Level 3 */
+//#define FILE_NAME          "vaderlinds116.txt"     /* Level 4 */
+//#define FILE_NAME          "vaderlinds150.txt"     /* Level 5*/
+#define FILE_NAME          "vaderlinds180.txt"     /* Level 6*/
+//#define FILE_NAME          "vaderlinds190.txt"     /* Level 7 */
 
 /**** File-global variables & definitions *****/
 
@@ -47,7 +54,7 @@ static void increase_recursion_counter(void);
 static unsigned char get_first_free_element(unsigned int puzzle[N][N],
                                             unsigned int* puiRow, unsigned int* puiCol);
 static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N]);
-static unsigned char solve_puzzle(unsigned int puzzle[N][N]);
+static unsigned char solve_puzzle_increment(unsigned int puzzle[N][N]);
 
 /*****************************************************************/
 
@@ -323,7 +330,7 @@ static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
 }
 
 /* Recursive solver */
-static unsigned char solve_puzzle(unsigned int puzzle[N][N])
+static unsigned char solve_puzzle_increment(unsigned int puzzle[N][N])
 {
     unsigned int uiRow, uiCol, uiValue;
 
@@ -349,7 +356,7 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N])
                 {
                     /* Assign possible candidate */
                     puzzle[uiRow][uiCol] = uiValue;
-                    if (E_OK == solve_puzzle(puzzle))
+                    if (E_OK == solve_puzzle_increment(puzzle))
                     {
                         /* Puzzle solved, we are done. This status comes  */
                         /* from get_first_free_element() in one-step-down */
@@ -422,7 +429,7 @@ int main()
     printf("               PART 2 - Solving the puzzle.\n");
 
     /* Invoke recursive puzzle solver */
-    ucStatus = solve_puzzle(puzzle);
+    ucStatus = solve_puzzle_increment(puzzle);
     if (E_NOT_OK == ucStatus)
     {
         printf("\n");
@@ -438,7 +445,7 @@ int main()
     else
     {
         printf("\n");
-        printf("RESULT: Puzzle solved SUCCESSFUL.\n");
+        printf("RESULT: Puzzle solved SUCCESSFUL (incremental).\n");
         printf("\n");
         printf("\n");
         print_puzzle(puzzle);
