@@ -1,8 +1,6 @@
 // sudoku.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-/* 1) Intentional single point exit by 'goto'. */
-
 #include <stdio.h>
 #include <limits.h>
 
