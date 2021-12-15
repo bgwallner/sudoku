@@ -19,7 +19,8 @@
 /* User defined */
 #define N                   9 /* size of puzzle */
 #define MAX_NBR_RECURSIONS  ULLONG_MAX
-#define FILE_NAME          "vaderlinds.txt" //"puzzle1.txt"
+#define FILE_NAME          "vaderlinds1.txt"     /* Level 1*/
+//#define FILE_NAME          "vaderlinds190.txt"  /* Level 7 */
 
 /**** File-global variables & definitions *****/
 
@@ -437,10 +438,6 @@ int main()
         printf("\n");
         print_puzzle(puzzle);
     }
-    
-    /* Print the (hopefully) solved puzzle */
-    printf("\n");
-    print_puzzle(puzzle);
 
     printf("\n");
     printf("Number of recursions needed: %d\n", recursion_ctr.remainder);
