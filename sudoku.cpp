@@ -641,52 +641,58 @@ int main()
         /* Only place if value is zero */
         if( 0 == newpuzzle[uiRow][uiCol] )
         {
-            newpuzzle[uiRow][uiCol] = uiValue;
-            newpuzzlecopy[uiRow][uiCol] = uiValue;
-
-            /* Try to solve the puzzle */
-            ucStatus = solve_puzzle_increment(newpuzzle);
-            if (E_OK == ucStatus)
+            /* Check if uiValue is valid for (uiRow, uiCol) */
+            if ((E_OK == is_in_col_valid(uiValue, newpuzzle, uiRow, uiCol)) &&
+                (E_OK == is_in_row_valid(uiValue, newpuzzle, uiRow, uiCol)) &&
+                (E_OK == is_in_group_valid(uiValue, newpuzzle, uiRow, uiCol)))
             {
-                printf("\n");
-                printf("RESULT: Initial puzzle & solved puzzle.\n");
-                printf("\n");
-                printf("Number of elements puzzle: %d\n", uiIterations+1);
-                printf("\n");
-                print_puzzle(newpuzzlecopy);
-                printf("\n");
-                print_puzzle(newpuzzle);
-                printf("\n");
-                printf("Number of recursions needed: %d\n", recursion_ctr.remainder);
+                newpuzzle[uiRow][uiCol] = uiValue;
+                newpuzzlecopy[uiRow][uiCol] = uiValue;
 
-                /* Check that puzzle have correct sums */
-                if (E_OK == validate_9_by_9_puzzle(newpuzzle))
+                /* Try to solve the puzzle */
+                ucStatus = solve_puzzle_increment(newpuzzle);
+                if (E_OK == ucStatus)
                 {
                     printf("\n");
-                    printf("RESULT: Puzzle validated SUCCESSFUL.\n");
+                    printf("RESULT: Initial puzzle & solved puzzle.\n");
+                    printf("\n");
+                    printf("Number of elements puzzle: %d\n", uiIterations + 1);
+                    printf("\n");
+                    print_puzzle(newpuzzlecopy);
+                    printf("\n");
+                    print_puzzle(newpuzzle);
+                    printf("\n");
+                    printf("Number of recursions needed: %d\n", recursion_ctr.remainder);
+
+                    /* Check that puzzle have correct sums */
+                    if (E_OK == validate_9_by_9_puzzle(newpuzzle))
+                    {
+                        printf("\n");
+                        printf("RESULT: Puzzle validated SUCCESSFUL.\n");
+                    }
+                    else
+                    {
+                        printf("\n");
+                        printf("RESULT: Puzzle validated FAILED.\n");
+                    }
+
+                    uiIterations++;
+
+                    /* Copy puzzlecopy to puzzle */
+                    for (uiRow = 0; uiRow < N; uiRow++)
+                    {
+                        for (uiCol = 0; uiCol < N; uiCol++)
+                        {
+                            newpuzzle[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
+                        }
+                    }
                 }
                 else
                 {
-                    printf("\n");
-                    printf("RESULT: Puzzle validated FAILED.\n");
+                    /* Not possible to solve */
+                    newpuzzle[uiRow][uiCol] = 0;
+                    newpuzzlecopy[uiRow][uiCol] = 0;
                 }
-
-                uiIterations++;
-
-                /* Copy puzzlecopy to puzzle */
-                for (uiRow = 0; uiRow < N; uiRow++)
-                {
-                    for (uiCol = 0; uiCol < N; uiCol++)
-                    {
-                        newpuzzle[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
-                    }
-                }
-            }
-            else
-            {
-                /* Not possible to solve */
-                newpuzzle[uiRow][uiCol] = 0;
-                newpuzzlecopy[uiRow][uiCol] = 0;
             }
         }
     }
