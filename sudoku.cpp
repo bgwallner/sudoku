@@ -52,7 +52,6 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N]);
 /* Reading the puzzle from FILE_NAME */
 static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
 {
-    unsigned char ucStatus = E_OK;
     unsigned int uiRow, uiCol, uiValue;
     char cValue = 0;
     FILE* fhPuzzle;
@@ -73,8 +72,7 @@ static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
                 /* Only allowed at N */
                 if (N != uiCol && uiRow < N)
                 {
-                    ucStatus = E_NOT_OK;
-                    goto end;
+                    return E_NOT_OK;
                 }
             }
 
@@ -99,9 +97,7 @@ static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
             }
         }
     }
-
-    end:
-    return ucStatus;
+    return E_OK;
 }
 
 /* Print the puzzle to console */
@@ -135,16 +131,13 @@ static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N
                                      unsigned int uiRow, unsigned int uiCol)
 {
     unsigned int uiIndex;
-    unsigned char ucStatus;
 
     /* Boundary check */
     if ((uiRow >= N) || (uiCol >= N))
     {
-        ucStatus = E_INDEX_ERROR;
-        goto end;
+        return E_INDEX_ERROR;
     }
     
-    ucStatus = E_OK;
     for (uiIndex = 0; uiIndex < N; uiIndex++)
     {
         /* Coloumn is running index */
@@ -152,14 +145,12 @@ static unsigned char is_in_row_valid(unsigned int uiValue, unsigned int puzzle[N
         {
             if (uiValue == puzzle[uiRow][uiIndex])
             {
-                ucStatus = E_NOT_OK;
-                goto end;
+                return E_NOT_OK;
             }
         }
     }
 
-    end:
-    return ucStatus;
+    return E_OK;
 }
 
 /* Check if provided uiValue is already present in uiCol. */
@@ -167,16 +158,13 @@ static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N
                                      unsigned int uiRow, unsigned int uiCol)
 {
     unsigned int uiIndex;
-    unsigned char ucStatus;
 
     /* Boundary check */
     if ((uiRow >= N) || (uiCol >= N))
     {
-        ucStatus = E_INDEX_ERROR;
-        goto end;
+        return E_INDEX_ERROR;
     }
 
-    ucStatus = E_OK;
     for (uiIndex = 0; uiIndex < N; uiIndex++)
     {
         /* Row is running index */
@@ -184,14 +172,12 @@ static unsigned char is_in_col_valid(unsigned int uiValue, unsigned int puzzle[N
         {
             if (uiValue == puzzle[uiIndex][uiCol])
             {
-                ucStatus = E_NOT_OK;
-                goto end;
+                return E_NOT_OK;
             }
         }
     }
 
-    end:
-    return ucStatus;
+    return E_OK;
 }
 
 /* Check if provided uiValue is already present in group belonging to */
@@ -200,13 +186,11 @@ static unsigned char is_in_group_valid(unsigned int uiValue, unsigned int puzzle
                                        unsigned int uiRow, unsigned int uiCol)
 {
     unsigned int uiRowStart, uiColStart, uiRowIndex, uiColIndex;
-    unsigned char ucStatus;
 
     /* Boundary check */
     if ((uiRow >= N) || (uiCol >= N))
     {
-        ucStatus = E_INDEX_ERROR;
-        goto end;
+        return E_INDEX_ERROR;
     }
 
     /* Find row and col start, e.g. group2 starts at col=3 and ends col=5 */
@@ -214,21 +198,18 @@ static unsigned char is_in_group_valid(unsigned int uiValue, unsigned int puzzle
     uiRowStart = uiRow - uiRow % 3;
     uiColStart = uiCol - uiCol % 3;
 
-    ucStatus = E_OK;
     for (uiRowIndex = uiRowStart; uiRowIndex < (uiRowStart + 3); uiRowIndex++)
     {
         for (uiColIndex = uiColStart; uiColIndex < (uiColStart + 3); uiColIndex++)
         {
             if (uiValue == puzzle[uiRowIndex][uiColIndex])
             {
-                ucStatus = E_NOT_OK;
-                goto end;
+                return E_NOT_OK;
             }
         }
     }
 
-    end:
-    return ucStatus;
+    return E_OK;
 }
 
 /* Increases counter in every recursion to determine complexity */
@@ -259,14 +240,12 @@ static unsigned char get_first_free_element(unsigned int puzzle[N][N],
                                             unsigned int* puiRow, unsigned int* puiCol)
 {
     unsigned int uiRow, uiCol;
-    unsigned char ucStatus;
 
     /* This function could utilize a stack with pairs (uiRow, uiCol) having */
     /* an element with value=0. However, to tedious to implement in C with  */
     /* no built-in support. Instead, do search from (0,0) in linear         */
     /* time.                                                                */
 
-    ucStatus = E_NOT_OK;
     for (uiRow = 0; uiRow < N; uiRow++)
     {
         for (uiCol = 0; uiCol < N; uiCol++)
@@ -276,22 +255,18 @@ static unsigned char get_first_free_element(unsigned int puzzle[N][N],
                 /* Found available element */
                 *puiRow = uiRow;
                 *puiCol = uiCol;
-                ucStatus = E_OK;
-                goto end; /* Forgive me, but better than return E_OK IMO */
+                return E_OK;
             }
         }
     }
-    end:
-    return ucStatus;
+    return E_NOT_OK;
 }
 
 /* Function to validate a 9x9 puzzle */
 static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
 {
     unsigned int uiRow, uiCol, uiSum;
-    unsigned char ucStatus;
 
-    ucStatus = E_OK;
     /* Check all rows that sum is 45 */
     for (uiRow = 0; uiRow < N; uiRow++)
     {
@@ -303,8 +278,7 @@ static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
 
         if (SUDOKU_SUM != uiSum)
         {
-            ucStatus = E_NOT_OK;
-            goto end;
+            return E_NOT_OK;
         }
     }
 
@@ -319,8 +293,7 @@ static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
 
         if (SUDOKU_SUM != uiSum)
         {
-            ucStatus = E_NOT_OK;
-            goto end;
+            return E_NOT_OK;
         }
     }
 
@@ -335,14 +308,12 @@ static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
             
             if (SUDOKU_SUM != uiSum)
             {
-                ucStatus = E_NOT_OK;
-                goto end;
+                return E_NOT_OK;
             }
         }
     }
 
-    end:
-    return ucStatus;
+    return E_OK;
 }
 
 /* Recursive solver */
@@ -373,7 +344,14 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N])
                 {
                     /* Assign possible candidate */
                     puzzle[uiRow][uiCol] = uiValue;
-                    if (E_OK != solve_puzzle(puzzle))
+                    if (E_OK == solve_puzzle(puzzle))
+                    {
+                        /* Puzzle solved, we are done. This status comes */
+                        /* from get_first_free_element() when no more    */
+                        /* zeros have been found.                        */
+                        return E_OK;
+                    }
+                    else
                     {
                         /* Did not solve puzzle */
                         puzzle[uiRow][uiCol] = 0;
@@ -381,16 +359,16 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N])
                 }
                 else
                 {
-                    /* TODO */
+                    /* Do nothing */
                 }
             }
     }
     else
     {
         /* No zeros found, we are done */
-        ucStatus = E_OK;
+        return E_OK;
     }
-    return ucStatus;
+    return E_NOT_OK;
 }
 
 int main()
@@ -437,6 +415,7 @@ int main()
 
     /* Invoke recursive puzzle solver */
     ucStatus = solve_puzzle(puzzle);
+    print_puzzle(puzzle);
     if (E_NOT_OK == ucStatus)
     {
         printf("\n");
