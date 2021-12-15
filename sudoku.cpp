@@ -320,7 +320,6 @@ static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
 static unsigned char solve_puzzle(unsigned int puzzle[N][N])
 {
     unsigned int uiRow, uiCol, uiValue;
-    unsigned char ucStatus;
 
     /* Inrease counter for every recursion */
     increase_recursion_counter();
@@ -346,9 +345,10 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N])
                     puzzle[uiRow][uiCol] = uiValue;
                     if (E_OK == solve_puzzle(puzzle))
                     {
-                        /* Puzzle solved, we are done. This status comes */
-                        /* from get_first_free_element() when no more    */
-                        /* zeros have been found.                        */
+                        /* Puzzle solved, we are done. This status comes  */
+                        /* from get_first_free_element() in one-step-down */
+                        /* call to solve_puzzle() when no more zeros have */
+                        /* been found.                                    */
                         return E_OK;
                     }
                     else
@@ -368,6 +368,8 @@ static unsigned char solve_puzzle(unsigned int puzzle[N][N])
         /* No zeros found, we are done */
         return E_OK;
     }
+    /* Puzzle not yet solved, "rolling back" since */
+    /* we set puzzle[uiRow][uiCol] = 0             */
     return E_NOT_OK;
 }
 
