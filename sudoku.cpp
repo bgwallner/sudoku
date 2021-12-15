@@ -27,8 +27,16 @@
 //#define FILE_NAME          "vaderlinds70.txt"      /* Level 3 */
 //#define FILE_NAME          "vaderlinds116.txt"     /* Level 4 */
 //#define FILE_NAME          "vaderlinds150.txt"     /* Level 5*/
-#define FILE_NAME          "vaderlinds180.txt"     /* Level 6*/
-//#define FILE_NAME          "vaderlinds190.txt"     /* Level 7 */
+//#define FILE_NAME          "vaderlinds180.txt"     /* Level 6*/
+#define FILE_NAME          "vaderlinds190.txt"     /* Level 7 */
+
+/* Using input-files above and plotting in Matlab, excluding */
+/* values that 'stick' out (probably well suited order for   */
+/* the recursive procedure. At around 55000 the curve goes   */
+/* balistic (upper limits).                                  */
+#define LEVEL_LOW    5000
+#define LEVEL_MEDIUM 10000
+#define LEVEL_HARD   55000
 
 /**** File-global variables & definitions *****/
 
@@ -55,6 +63,9 @@ static unsigned char get_first_free_element(unsigned int puzzle[N][N],
                                             unsigned int* puiRow, unsigned int* puiCol);
 static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N]);
 static unsigned char solve_puzzle_increment(unsigned int puzzle[N][N]);
+static unsigned char solve_puzzle_decrement(unsigned int puzzle[N][N]);
+static unsigned char is_solution_unique(unsigned int puzzle[N][N],
+    unsigned int puzzlecopy[N][N]);
 
 /*****************************************************************/
 
@@ -329,7 +340,12 @@ static unsigned char validate_9_by_9_puzzle(unsigned int puzzle[N][N])
     return E_OK;
 }
 
-/* Recursive solver */
+/* Recursive solver - find first OR unique solution. I.e. if     */
+/* first found number will be assigned e.g. 3 and a solution is  */
+/* found then we don't know if some number in 4-9 would generate */
+/* a correct solution. This can be achieved by running uiValue   */
+/* for-loop from N->1 instead. If the same solution is achieved  */
+/* solution is unique.                                           */
 static unsigned char solve_puzzle_increment(unsigned int puzzle[N][N])
 {
     unsigned int uiRow, uiCol, uiValue;
@@ -386,10 +402,86 @@ static unsigned char solve_puzzle_increment(unsigned int puzzle[N][N])
     return E_NOT_OK;
 }
 
+static unsigned char solve_puzzle_decrement(unsigned int puzzle[N][N])
+{
+    unsigned int uiRow, uiCol, uiValue;
+
+    /* Inrease counter for every recursion */
+    increase_recursion_counter();
+
+    /* Check that max number of recursions not exceeded */
+    if (recursion_ctr.remainder > MAX_NBR_RECURSIONS)
+    {
+        return E_MAX_RECURSIONS;
+    }
+
+    /* Find first element with value 0 */
+    if (E_OK == get_first_free_element(puzzle, &uiRow, &uiCol)) /* <--- here iteration in uiRow,uiCol takes place */
+    {
+        /* Test all values from 1..N */
+        for (uiValue = N; uiValue <= 1; uiValue--)
+        {
+            /* Check if uiValue is valid for (uiRow, uiCol) */
+            if ((E_OK == is_in_col_valid(uiValue, puzzle, uiRow, uiCol)) &&
+                (E_OK == is_in_row_valid(uiValue, puzzle, uiRow, uiCol)) &&
+                (E_OK == is_in_group_valid(uiValue, puzzle, uiRow, uiCol)))
+            {
+                /* Assign possible candidate */
+                puzzle[uiRow][uiCol] = uiValue;
+                if (E_OK == solve_puzzle_increment(puzzle))
+                {
+                    /* Puzzle solved, we are done. This status comes  */
+                    /* from get_first_free_element() in one-step-down */
+                    /* call to solve_puzzle() when no more zeros have */
+                    /* been found.                                    */
+                    return E_OK;
+                }
+                else
+                {
+                    /* Did not solve puzzle */
+                    puzzle[uiRow][uiCol] = 0;
+                }
+            }
+            else
+            {
+                /* Do nothing */
+            }
+        }
+    }
+    else
+    {
+        /* No zeros found, we are done */
+        return E_OK;
+    }
+    /* Puzzle not yet solved, "rolling back" since */
+    /* we set puzzle[uiRow][uiCol] = 0             */
+    return E_NOT_OK;
+}
+
+/* Check if puzzles are the same */
+static unsigned char is_solution_unique(unsigned int puzzle[N][N],
+                                        unsigned int puzzlecopy[N][N])
+{
+    unsigned int uiRow, uiCol;
+    for (uiRow = 0; uiRow < N; uiRow++)
+    {
+        for (uiCol = 0; uiCol < N; uiCol++)
+        {
+            if (puzzlecopy[uiRow][uiCol] != puzzle[uiRow][uiCol])
+            {
+                return E_NOT_OK;
+            }
+        }
+    }
+    return E_OK;
+}
+
 int main()
 {
     unsigned int puzzle[N][N] = { 0 }; /* puzzle[row][col] = puzzle[y][x] */
+    unsigned int puzzlecopy[N][N] = { 0 };
     unsigned char ucStatus = E_NOT_OK;
+    unsigned int uiRow, uiCol;
 
     /* Init recursion counter */
     recursion_ctr.remainder = 0;
@@ -419,6 +511,15 @@ int main()
 
     /* Print the puzzle */
     print_puzzle(puzzle);
+
+    /* Copy puzzle to puzzlecopy */
+    for (uiRow = 0; uiRow < N; uiRow++)
+    {
+        for (uiCol = 0; uiCol < N; uiCol++)
+        {
+            puzzlecopy[uiRow][uiCol] = puzzle[uiRow][uiCol];
+        }
+    }
 
     printf("\n");
     printf("               PART 1 - COMPLETED.\n");
@@ -453,6 +554,28 @@ int main()
 
     printf("\n");
     printf("Number of recursions needed: %d\n", recursion_ctr.remainder);
+    printf("\n");
+    printf(" - Assumtion: Complexity is a measure of how hard the puzzle is.\n");
+    if (recursion_ctr.remainder < LEVEL_LOW)
+    {
+        printf("\n");
+        printf(" - The level of the puzzle is considered LOW.\n");
+    }
+    else if (recursion_ctr.remainder < LEVEL_MEDIUM)
+    {
+        printf("\n");
+        printf(" - The level of the puzzle is considered MEDIUM.\n");
+    }
+    else if (recursion_ctr.remainder < LEVEL_HARD)
+    {
+        printf("\n");
+        printf(" - The level of the puzzle is considered HARD.\n");
+    }
+    else
+    {
+        printf("\n");
+        printf(" - The level of the puzzle is considered SAMURAI.\n");
+    }
 
     /* Check that puzzle have correct sums */
     if (E_OK == validate_9_by_9_puzzle(puzzle))
@@ -464,6 +587,30 @@ int main()
     {
         printf("\n");
         printf("RESULT: Puzzle validated FAILED.\n");
+    }
+
+    /* Solve by decrementing */
+
+    printf("\n");
+    printf("UNIQUENESS: Start to verify if solution is unique.\n");
+    ucStatus = solve_puzzle_decrement(puzzlecopy);
+    printf("\n");
+    print_puzzle(puzzlecopy);
+
+    if (E_OK == ucStatus)
+    {
+        if (E_OK == is_solution_unique(puzzle, puzzlecopy))
+        {
+            printf(" - Verified unique solution.\n");
+        }
+        else
+        {
+            printf(" - Other solutions exist.\n");
+        }
+    }
+    else
+    {
+        printf(" - It was not possible to solve in decrementing order.\n");
     }
 
     /************** PART 3 ***************/
