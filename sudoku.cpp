@@ -19,7 +19,7 @@
 /* User defined */
 #define GNU_LINUX           0
 #define N                   9 /* size of puzzle */
-#define MAX_NBR_RECURSIONS  ULLONG_MAX
+#define MAX_NBR_RECURSIONS  1000000 /* Needs to be set 'fair' since otherwise we spend to much time in recursion */
 
 /* Input from Vaderlinds Stora Sudoku boken. */
 //#define FILE_NAME          "vaderlinds1.txt"       /* Level 1*/
@@ -631,7 +631,7 @@ int main()
     ucStatus = E_NOT_OK;
 
     srand((unsigned) time(&t));
-    while( uiIterations < 20 )
+    while( uiIterations < 25 )
     {
         uiRow = rand() % 10;
         uiCol = rand() % 10;
@@ -658,6 +658,19 @@ int main()
                 print_puzzle(newpuzzle);
                 printf("\n");
                 printf("Number of recursions needed: %d\n", recursion_ctr.remainder);
+
+                /* Check that puzzle have correct sums */
+                if (E_OK == validate_9_by_9_puzzle(newpuzzle))
+                {
+                    printf("\n");
+                    printf("RESULT: Puzzle validated SUCCESSFUL.\n");
+                }
+                else
+                {
+                    printf("\n");
+                    printf("RESULT: Puzzle validated FAILED.\n");
+                }
+
                 uiIterations++;
 
                 /* Copy puzzlecopy to puzzle */
