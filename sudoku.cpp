@@ -17,6 +17,7 @@
 #define E_INDEX_ERROR    0xFF
 
 /* User defined */
+#define GNU_LINUX           0
 #define N                   9 /* size of puzzle */
 #define MAX_NBR_RECURSIONS  ULLONG_MAX
 #define FILE_NAME          "vaderlinds1.txt"     /* Level 1*/
@@ -57,7 +58,11 @@ static unsigned char read_puzzle_from_txt( unsigned int puzzle[N][N] )
     char cValue = 0;
     FILE* fhPuzzle;
     
+#if ( GNU_LINUX == 1 )
+    fhPuzzle = fopen(FILE_NAME, "r");
+#else
     fopen_s(&fhPuzzle, FILE_NAME, "r");
+#endif
 
     uiRow = 0;
     uiCol = 0;
