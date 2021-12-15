@@ -30,7 +30,7 @@
 
 /* Using input-files above and plotting in Matlab, excluding */
 /* values that 'stick' out (probably well suited order for   */
-/* the recursive procedure. At around 55000 the curve goes   */
+/* the recursive procedure). At around 55000 the curve goes  */
 /* balistic (upper limits).                                  */
 #define LEVEL_LOW    5000
 #define LEVEL_MEDIUM 10000
@@ -520,9 +520,6 @@ int main()
         }
     }
 
-    printf("\n");
-    printf("               PART 1 - COMPLETED.\n");
-
     /************** PART 2 ***************/
 
     printf("\n");
@@ -603,18 +600,18 @@ int main()
         if (E_OK == is_solution_unique(puzzle, puzzlecopy))
         {
             printf("\n");
-            printf(" - Verified unique solution.\n");
+            printf("RESULT: Verified unique solution.\n");
         }
         else
         {
             printf("\n");
-            printf(" - Other solutions exist.\n");
+            printf("RESULT: Other solutions exist.\n");
         }
     }
     else
     {
         printf("\n");
-        printf(" - It was not possible to solve in decrementing order.\n");
+        printf("RESULT: It was not possible to solve in decrementing order.\n");
     }
 
     /************** PART 3 ***************/
