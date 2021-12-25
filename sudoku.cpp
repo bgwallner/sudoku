@@ -43,13 +43,7 @@
 
 /**** File-global variables & definitions *****/
 
-typedef struct
-{
-    unsigned long remainder;
-    unsigned long integer_nbr;
-} recursion_ctr_t;
-
-static recursion_ctr_t recursion_ctr;
+static unsigned long m_ulRecursionCtr;
 
 /******************* LOCAL FUNCTION DECLARATIONS *****************/
 
@@ -240,25 +234,17 @@ static unsigned char is_in_group_valid(unsigned int uiValue, unsigned int puzzle
 }
 
 /* Increases counter in every recursion to determine complexity */
-/* Max validity for function ULONG_MAX^2.                       */
 static void increase_recursion_counter(void)
 {
     /* Check if reached ULLONG_MAX (64-bits limits.h) */
-    if (ULLONG_MAX == recursion_ctr.remainder &&
-        ULLONG_MAX == recursion_ctr.integer_nbr)
+    if (ULLONG_MAX == m_ulRecursionCtr)
     {
         /* Not much to do */
-        recursion_ctr.integer_nbr = 0;
-        recursion_ctr.remainder = 0;
-    }
-    else if (ULLONG_MAX == recursion_ctr.remainder)
-    {
-        recursion_ctr.integer_nbr++;
-        recursion_ctr.remainder = 0;
+        m_ulRecursionCtr = 0;
     }
     else
     {
-        recursion_ctr.remainder++;
+        m_ulRecursionCtr++;
     }
 }
 
@@ -357,7 +343,7 @@ static unsigned char solve_puzzle_increment(unsigned int puzzle[N][N])
     increase_recursion_counter();
 
     /* Check that max number of recursions not exceeded */
-    if (recursion_ctr.remainder > MAX_NBR_RECURSIONS)
+    if (m_ulRecursionCtr > MAX_NBR_RECURSIONS)
     {
         return E_MAX_RECURSIONS;
     }
@@ -414,7 +400,7 @@ static unsigned char solve_puzzle_decrement(unsigned int puzzle[N][N])
     increase_recursion_counter();
 
     /* Check that max number of recursions not exceeded */
-    if (recursion_ctr.remainder > MAX_NBR_RECURSIONS)
+    if (m_ulRecursionCtr > MAX_NBR_RECURSIONS)
     {
         return E_MAX_RECURSIONS;
     }
@@ -493,8 +479,7 @@ int main()
     time_t t;
 
     /* Init recursion counter */
-    recursion_ctr.remainder = 0;
-    recursion_ctr.integer_nbr = 1;
+    m_ulRecursionCtr = 0;
 
     printf("\n");
     printf("Program START...\n");
@@ -556,20 +541,20 @@ int main()
     }
 
     printf("\n");
-    printf(" - Number of recursions needed: %lu\n", recursion_ctr.remainder);
+    printf(" - Number of recursions needed: %lu\n", m_ulRecursionCtr);
     printf("\n");
     printf(" - Assumption: The complexity is a measure of how hard the puzzle is.\n");
-    if (recursion_ctr.remainder < LEVEL_LOW)
+    if (m_ulRecursionCtr < LEVEL_LOW)
     {
         printf("\n");
         printf(" - The level of the puzzle is considered LOW.\n");
     }
-    else if (recursion_ctr.remainder < LEVEL_MEDIUM)
+    else if (m_ulRecursionCtr < LEVEL_MEDIUM)
     {
         printf("\n");
         printf(" - The level of the puzzle is considered MEDIUM.\n");
     }
-    else if (recursion_ctr.remainder < LEVEL_HARD)
+    else if (m_ulRecursionCtr < LEVEL_HARD)
     {
         printf("\n");
         printf(" - The level of the puzzle is considered HARD.\n");
@@ -649,7 +634,7 @@ int main()
             uiCol = rand() % (N+1);
             uiValue= rand() % (N+1);
 
-            recursion_ctr.remainder = 0;
+            m_ulRecursionCtr = 0;
             /* Only place if value is zero */
             if( 0 == newpuzzle_increment[uiRow][uiCol] )
             {
@@ -683,7 +668,7 @@ int main()
         }
 
         /* Solve puzzle decremental */
-        recursion_ctr.remainder = 0;
+        m_ulRecursionCtr = 0;
 
         /* Set init values for solving decremental */
         memcpy(newpuzzle_decrement, newpuzzlecopy, N * N * sizeof(unsigned int));
@@ -717,7 +702,7 @@ int main()
     printf("\n");
     print_puzzle(newpuzzle_increment);
     printf("\n");
-    printf("Number of recursions needed: %lu\n", recursion_ctr.remainder);
+    printf("Number of recursions needed: %lu\n", m_ulRecursionCtr);
 
     printf("\n");
     printf("Program END.\n");
