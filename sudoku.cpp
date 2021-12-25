@@ -488,6 +488,7 @@ int main()
     unsigned int newpuzzle_decrement[N][N] = {0};
     unsigned int newpuzzlecopy[N][N] = {0};
     unsigned char ucStatus = E_NOT_OK;
+    unsigned char ucUniqueSolution;
     unsigned int uiRow, uiCol, uiCounter, uiValue, uiIterations;
     time_t t;
 
@@ -640,105 +641,122 @@ int main()
 
     uiIterations = 0;
     ucStatus = E_NOT_OK;
+    ucUniqueSolution = 0;
 
     srand((unsigned) time(&t));
-    while( uiIterations < NEW_PUZZLE_MAX_ELEMS )
+    while(0 == ucUniqueSolution)
     {
-        uiRow = rand() % (N+1);
-        uiCol = rand() % (N+1);
-        uiValue= rand() % (N+1);
-
-        recursion_ctr.remainder = 0;
-        /* Only place if value is zero */
-        if( 0 == newpuzzle_increment[uiRow][uiCol] )
+        while( uiIterations < NEW_PUZZLE_MAX_ELEMS )
         {
-            /* Check if uiValue is valid for (uiRow, uiCol) */
-            if ((E_OK == is_in_col_valid(uiValue, newpuzzle_increment, uiRow, uiCol)) &&
-                (E_OK == is_in_row_valid(uiValue, newpuzzle_increment, uiRow, uiCol)) &&
-                (E_OK == is_in_group_valid(uiValue, newpuzzle_increment, uiRow, uiCol)))
+            uiRow = rand() % (N+1);
+            uiCol = rand() % (N+1);
+            uiValue= rand() % (N+1);
+
+            recursion_ctr.remainder = 0;
+            /* Only place if value is zero */
+            if( 0 == newpuzzle_increment[uiRow][uiCol] )
             {
-                newpuzzle_increment[uiRow][uiCol] = uiValue;
-                newpuzzlecopy[uiRow][uiCol] = uiValue;
-
-                /* Try to solve the puzzle by incrementing and decrementing */
-                if (E_OK == solve_puzzle_increment(newpuzzle_increment))
+                /* Check if uiValue is valid for (uiRow, uiCol) */
+                if ((E_OK == is_in_col_valid(uiValue, newpuzzle_increment, uiRow, uiCol)) &&
+                    (E_OK == is_in_row_valid(uiValue, newpuzzle_increment, uiRow, uiCol)) &&
+                    (E_OK == is_in_group_valid(uiValue, newpuzzle_increment, uiRow, uiCol)))
                 {
-                    uiIterations++;
+                    newpuzzle_increment[uiRow][uiCol] = uiValue;
+                    newpuzzlecopy[uiRow][uiCol] = uiValue;
 
-                    /* Copy puzzlecopy to puzzle */
-                    if( uiIterations < NEW_PUZZLE_MAX_ELEMS)
+                    /* Try to solve the puzzle by incrementing and decrementing */
+                    if (E_OK == solve_puzzle_increment(newpuzzle_increment))
                     {
-                        for (uiRow = 0; uiRow < N; uiRow++)
+                        uiIterations++;
+
+                        /* Copy puzzlecopy to puzzle */
+                        if( uiIterations < NEW_PUZZLE_MAX_ELEMS)
                         {
-                            for (uiCol = 0; uiCol < N; uiCol++)
+                            for (uiRow = 0; uiRow < N; uiRow++)
                             {
-                                newpuzzle_increment[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
+                                for (uiCol = 0; uiCol < N; uiCol++)
+                                {
+                                    newpuzzle_increment[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        /* Not possible to solve */
+                        newpuzzle_increment[uiRow][uiCol] = 0;
+                        newpuzzlecopy[uiRow][uiCol] = 0;
+                    }
                 }
-                else
+            }
+        }
+
+        printf("\n");
+        printf("Number of elements puzzle: %d\n", uiIterations + 1);
+        printf("\n");
+        print_puzzle(newpuzzlecopy);
+        printf("\n");
+        printf(" - Solving the puzzle by incremental.\n");
+        printf("\n");
+        print_puzzle(newpuzzle_increment);
+        printf("\n");
+        printf("Number of recursions needed: %lu\n", recursion_ctr.remainder);
+
+        /* Solve puzzle decremental */
+        recursion_ctr.remainder = 0;
+
+        /* Set init values for solving decremental */
+        for (uiRow = 0; uiRow < N; uiRow++)
+        {
+            for (uiCol = 0; uiCol < N; uiCol++)
+            {
+                newpuzzle_decrement[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
+            }
+        }
+
+        if (E_OK == solve_puzzle_decrement(newpuzzle_decrement))
+        {
+            printf("\n");
+            printf(" - Solving puzzle by decrementing.\n");
+            printf("\n");
+            print_puzzle(newpuzzle_decrement);
+            printf("\n");
+            printf("Number of recursions needed: %lu\n", recursion_ctr.remainder);
+        }
+        else
+        {
+            printf("\n");
+            printf("It was not possible solving puzzle decremental.\n");
+            printf("\n");
+            print_puzzle(newpuzzle_decrement);
+            printf("\n");
+            printf("Number of recursions needed: %lu\n", recursion_ctr.remainder);
+        }
+
+        /* Check if solutions are equal */
+        if (E_OK == is_equal(newpuzzle_increment, newpuzzle_decrement))
+        {
+            printf("\n");
+            printf("RESULT: Verified unique solution.\n");
+            ucUniqueSolution = 1;
+        }
+        else
+        {
+            printf("\n");
+            printf("RESULT: Other solutions exist.\n");
+
+            /* Reset puzzles */
+            uiIterations = 0;
+            for (uiRow = 0; uiRow < N; uiRow++)
+            {
+                for (uiCol = 0; uiCol < N; uiCol++)
                 {
-                    /* Not possible to solve */
                     newpuzzle_increment[uiRow][uiCol] = 0;
+                    newpuzzle_decrement[uiRow][uiCol] = 0;
                     newpuzzlecopy[uiRow][uiCol] = 0;
                 }
             }
         }
-    }
-
-    printf("\n");
-    printf("Number of elements puzzle: %d\n", uiIterations + 1);
-    printf("\n");
-    print_puzzle(newpuzzlecopy);
-    printf("\n");
-    printf(" - Solving the puzzle by incremental.\n");
-    printf("\n");
-    print_puzzle(newpuzzle_increment);
-    printf("\n");
-    printf("Number of recursions needed: %lu\n", recursion_ctr.remainder);
-
-    /* Solve puzzle decremental */
-    recursion_ctr.remainder = 0;
-
-    /* Set init values */
-    for (uiRow = 0; uiRow < N; uiRow++)
-    {
-        for (uiCol = 0; uiCol < N; uiCol++)
-        {
-            newpuzzle_decrement[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
-        }
-    }
-
-    if (E_OK == solve_puzzle_decrement(newpuzzle_decrement))
-    {
-        printf("\n");
-        printf(" - Solving puzzle by decrementing.\n");
-        printf("\n");
-        print_puzzle(newpuzzle_decrement);
-        printf("\n");
-        printf("Number of recursions needed: %lu\n", recursion_ctr.remainder);
-    }
-    else
-    {
-        printf("\n");
-        printf("It was not possible solving puzzle decremental.\n");
-        printf("\n");
-        print_puzzle(newpuzzle_decrement);
-        printf("\n");
-        printf("Number of recursions needed: %lu\n", recursion_ctr.remainder);
-    }
-
-    /* Check if solutions are equal */
-    if (E_OK == is_equal(newpuzzle_increment, newpuzzle_decrement))
-    {
-        printf("\n");
-        printf("RESULT: Verified unique solution.\n");
-    }
-    else
-    {
-        printf("\n");
-        printf("RESULT: Other solutions exist.\n");
     }
 
     printf("\n");
