@@ -38,7 +38,7 @@
 #define LEVEL_MEDIUM 10000
 #define LEVEL_HARD   55000
 
-#define NEW_PUZZLE_MAX_ELEMS 22
+#define NEW_PUZZLE_MAX_ELEMS 23
 #define NEW_PUZZLE_MIN_ELEMS 20
 
 /**** File-global variables & definitions *****/
@@ -700,6 +700,16 @@ int main()
 
     /* Solve puzzle decremental */
     recursion_ctr.remainder = 0;
+
+    /* Set init values */
+    for (uiRow = 0; uiRow < N; uiRow++)
+    {
+        for (uiCol = 0; uiCol < N; uiCol++)
+        {
+            newpuzzle_decrement[uiRow][uiCol] = newpuzzlecopy[uiRow][uiCol];
+        }
+    }
+
     if (E_OK == solve_puzzle_decrement(newpuzzle_decrement))
     {
         printf("\n");
