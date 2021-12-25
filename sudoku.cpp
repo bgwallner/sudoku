@@ -7,6 +7,10 @@
 #include <limits.h>
 #include <time.h>
 
+#include <iostream>
+#include <chrono>
+#include <ctime>
+
 /******************* DEFINES ******************/
 
 #define SUDOKU_SUM 45 /* sum of row, col or group */
@@ -39,7 +43,7 @@
 #define LEVEL_MEDIUM 10000
 #define LEVEL_HARD   55000
 
-#define NEW_PUZZLE_NBR_CLUES 25
+#define NEW_PUZZLE_NBR_CLUES 22
 
 /**** File-global variables & definitions *****/
 
@@ -476,7 +480,8 @@ int main()
     unsigned char ucStatus = E_NOT_OK;
     unsigned char ucUniqueSolution;
     unsigned int uiRow, uiCol, uiValue, uiIterations;
-    time_t t;
+    time_t t, tStartTime, tStopTime;
+    char cTimeStr[26];
 
     /* Init recursion counter */
     m_ulRecursionCtr = 0;
@@ -620,6 +625,13 @@ int main()
 
     printf("\n");
     printf(" - Be patient...\n");
+    printf("\n");
+
+    auto start = std::chrono::system_clock::now();
+    auto legacyStart = std::chrono::system_clock::to_time_t(start);
+    char tmBuff[30];
+    ctime_s(tmBuff, sizeof(tmBuff), &legacyStart);
+    std::cout << " - Startime: " << tmBuff << '\n';
 
     uiIterations = 0;
     ucStatus = E_NOT_OK;
@@ -692,6 +704,11 @@ int main()
             memset(newpuzzlecopy, 0, N * N * sizeof(unsigned int));
         }
     }
+
+    auto stop = std::chrono::system_clock::now();
+    auto legacyStop = std::chrono::system_clock::to_time_t(stop);
+    ctime_s(tmBuff, sizeof(tmBuff), &legacyStop);
+    std::cout << " - Stoptime: " << tmBuff << '\n';
 
     printf("\n");
     printf("RESULT: A unique solution has been found.\n");
