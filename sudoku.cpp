@@ -39,7 +39,7 @@
 #define LEVEL_MEDIUM 10000
 #define LEVEL_HARD   55000
 
-#define NEW_PUZZLE_NBR_CLUES 20
+#define NEW_PUZZLE_NBR_CLUES 25
 
 /**** File-global variables & definitions *****/
 
